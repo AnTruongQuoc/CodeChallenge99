@@ -6,7 +6,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className='bg-background flex h-dvh flex-col'>
       <AppHeader />
-      <main className='flex-1'>{children}</main>
+      <main className='h-full w-full flex-1'>{children}</main>
       <Toaster richColors position='top-center' />
     </div>
   );

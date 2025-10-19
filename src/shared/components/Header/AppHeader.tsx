@@ -6,7 +6,7 @@ import { headerItems } from './headerItems';
 
 export default function AppHeader() {
   return (
-    <header className='bg-background'>
+    <header className='bg-background flex h-16 max-h-16'>
       <div className='container mx-auto px-4 py-4'>
         <nav className='flex items-center justify-between'>
           <AppLogo />
