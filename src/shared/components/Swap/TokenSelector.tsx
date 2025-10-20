@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Check, ChevronDown, Search } from 'lucide-react';
 import Image from 'next/image';
@@ -9,12 +9,14 @@ import { useJupiterSearch } from '@/shared/api/jupiter/hooks/useJupiter';
 import { SearchItem } from '@/shared/api/jupiter/types';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { cn } from '@/shared/libs/utils';
 
 interface TokenSelectorProps {
   selectedToken: SearchItem | null;
   onTokenSelect: (token: SearchItem) => void;
   placeholder?: string;
   className?: string;
+  defaultSearchToken?: string;
 }
 
 export default function TokenSelector({
@@ -22,6 +24,7 @@ export default function TokenSelector({
   onTokenSelect,
   placeholder = 'Select token',
   className = '',
+  defaultSearchToken = '',
 }: TokenSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,14 +39,31 @@ export default function TokenSelector({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const shouldFetchSearchResults = useMemo(
+    () => isOpen || defaultSearchToken.length > 0,
+    [isOpen, defaultSearchToken],
+  );
+
   // Fetch search results
-  const { data: searchResults, isLoading } = useJupiterSearch(debouncedQuery);
+  const { data: searchResults, isLoading } = useJupiterSearch(
+    debouncedQuery,
+    shouldFetchSearchResults,
+  );
 
   const handleTokenSelect = (token: SearchItem) => {
     onTokenSelect(token);
     setIsOpen(false);
     setSearchQuery('');
   };
+
+  useEffect(() => {
+    if (defaultSearchToken && searchResults?.length && !selectedToken) {
+      const defaultToken = searchResults.find(token => token.id === defaultSearchToken);
+      if (defaultToken) {
+        onTokenSelect(defaultToken);
+      }
+    }
+  }, [defaultSearchToken, onTokenSelect, searchResults, selectedToken]);
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
@@ -72,16 +92,22 @@ export default function TokenSelector({
             <span className='text-muted-foreground'>{placeholder}</span>
           )}
           <ChevronDown
-            className={`text-muted-foreground h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={cn(
+              'text-muted-foreground h-4 w-4 transition-transform',
+              isOpen && 'rotate-180',
+            )}
           />
         </div>
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
+        <DialogContent
+          showCloseButton={false}
+          className='bg-card max-h-80 rounded-lg p-0 shadow-lg'
+        >
+          <DialogHeader className='sr-only'>
             <DialogTitle></DialogTitle>
           </DialogHeader>
-          <div className='bg-card border-border absolute top-full right-0 left-0 z-50 mt-2 max-h-80 overflow-hidden rounded-lg border shadow-lg'>
+          <div className='max-h-80 overflow-hidden rounded-lg'>
             <div className='border-border border-b p-3'>
               <div className='relative'>
                 <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
@@ -92,6 +118,7 @@ export default function TokenSelector({
                   onChange={e => setSearchQuery(e.target.value)}
                   className='bg-background border-border text-foreground placeholder-muted-foreground w-full rounded-md border py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-indigo-500'
                   autoFocus
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -118,6 +145,7 @@ export default function TokenSelector({
                       onError={e => {
                         (e.target as HTMLImageElement).src = '/default-token.svg';
                       }}
+                      unoptimized
                     />
                     <div className='flex-1 text-left'>
                       <div className='flex items-center gap-2'>

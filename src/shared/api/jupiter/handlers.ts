@@ -1,12 +1,18 @@
 import axios from 'axios';
 
+import { env } from '@/shared/libs/env';
+
 import { OrderResponse, SearchResponse } from './types';
 
-const JUPITER_API_BASE = 'https://lite-api.jup.ag/ultra/v1';
+const JUPITER_API_BASE = env.NEXT_PUBLIC_JUPITER_URL;
+
+const JupiterEndpoints = {
+  ULTRA: `${JUPITER_API_BASE}/ultra/v1`,
+};
 
 export const getSearchResponse = async (query: string) => {
   const response = await axios.get<unknown, SearchResponse>(
-    `${JUPITER_API_BASE}/search?query=${query}`,
+    `${JupiterEndpoints.ULTRA}/search?query=${query}`,
   );
   return response.data;
 };
@@ -18,7 +24,7 @@ export const getOrderResponse = async (
   taker: string,
 ) => {
   const response = await axios.get<unknown, OrderResponse>(
-    `${JUPITER_API_BASE}/order?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&taker=${taker}`,
+    `${JupiterEndpoints.ULTRA}/order?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&taker=${taker}`,
   );
   return response.data;
 };
@@ -39,16 +45,20 @@ export const getQuote = async (
   if (taker) {
     queryParams.set('taker', taker);
   }
-  const response = await axios.get(`${JUPITER_API_BASE}/order?${queryParams.toString()}`);
+  const response = await axios.get(`${JupiterEndpoints.ULTRA}/order?${queryParams.toString()}`);
   return response.data;
 };
 
-export const executeSwap = async (transaction: string, userPublicKey: string) => {
-  // This would typically involve signing and sending the transaction
-  // For now, we'll return the transaction data
-  return {
+/**
+ * Docs: https://dev.jup.ag/docs/ultra/execute-order
+ * @param transaction
+ * @param requestId
+ * @returns
+ */
+export const executeSwap = async (transaction: string, requestId: string) => {
+  const response = await axios.post(`${JupiterEndpoints.ULTRA}/execute`, {
     transaction,
-    userPublicKey,
-    status: 'pending',
-  };
+    requestId,
+  });
+  return response.data;
 };

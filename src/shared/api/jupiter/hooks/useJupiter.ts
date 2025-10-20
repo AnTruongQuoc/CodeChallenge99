@@ -1,12 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getOrderResponse, getQuote, getSearchResponse } from '../handlers';
+import { executeSwap, getOrderResponse, getQuote, getSearchResponse } from '../handlers';
 
-export const useJupiterSearch = (q: string) => {
+export const useJupiterSearch = (q: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['jupiter-search', q],
     queryFn: () => getSearchResponse(q),
-    enabled: q.length > 0,
+    enabled,
     staleTime: 30000, // 30 seconds
   });
 };
@@ -26,7 +26,6 @@ export const useJupiterQuote = (
     refetchInterval: 15000, // Refetch every 15 seconds for live quotes
   });
 };
-
 export const useJupiterOrder = () => {
   return useMutation({
     mutationFn: ({
@@ -40,5 +39,12 @@ export const useJupiterOrder = () => {
       amount: string;
       taker: string;
     }) => getOrderResponse(inputMint, outputMint, amount, taker),
+  });
+};
+
+export const useJupiterExecuteSwap = () => {
+  return useMutation({
+    mutationFn: ({ transaction, requestId }: { transaction: string; requestId: string }) =>
+      executeSwap(transaction, requestId),
   });
 };

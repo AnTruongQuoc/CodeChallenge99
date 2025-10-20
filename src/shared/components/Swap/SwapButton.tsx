@@ -52,9 +52,9 @@ export function SwapDirectionButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className='bg-card border-border hover:bg-accent absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform rounded-full border p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+      className='group bg-card border-border hover:bg-accent absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform rounded-full border-2 p-2 transition-colors hover:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-75'
     >
-      <ArrowUpDown className='text-foreground h-4 w-4' />
+      <ArrowUpDown className='text-foreground size-4 transition-colors group-hover:text-indigo-500' />
     </button>
   );
 }

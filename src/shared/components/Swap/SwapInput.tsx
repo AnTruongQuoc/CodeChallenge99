@@ -18,6 +18,7 @@ interface SwapInputProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  defaultSearchToken?: string;
 }
 
 export default function SwapInput({
@@ -31,6 +32,7 @@ export default function SwapInput({
   placeholder = '0.0',
   disabled = false,
   className = '',
+  defaultSearchToken = '',
 }: SwapInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -78,7 +80,7 @@ export default function SwapInput({
       )}
     >
       <div className='flex items-center justify-between'>
-        <label className='text-muted-foreground text-sm font-medium'>{label}</label>
+        <label className='text-foreground text-sm font-medium'>{label}</label>
         {balance !== undefined && (
           <div className='flex items-center gap-2'>
             <span className='text-muted-foreground text-xs'>Balance: {formatBalance(balance)}</span>
@@ -100,6 +102,7 @@ export default function SwapInput({
             selectedToken={selectedToken}
             onTokenSelect={onTokenSelect}
             placeholder='Select token'
+            defaultSearchToken={defaultSearchToken}
           />
 
           <input
