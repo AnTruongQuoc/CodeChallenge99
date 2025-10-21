@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: 'Code Challenge by @anzhang',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{
