@@ -2,6 +2,15 @@
 
 A Next.js application showcasing three coding challenges: algorithmic problem solving, Solana token swapping, and React code review analysis.
 
+Beside of using formatted structure following folked repo.
+I deciced to build a fancy UI for 3 problems following pages.
+
+`Problem 1 - /`
+
+`Problem 2 - /swap`
+
+`Problem 3 - /messy-review`
+
 ## 🚀 Tech Stack
 
 ### Core Framework
