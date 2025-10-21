@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { usePrivy } from '@privy-io/react-auth';
 import { useSignTransaction, useWallets } from '@privy-io/react-auth/solana';
@@ -45,13 +45,17 @@ export default function SwapInterface({
   const [slippageBps, setSlippageBps] = useState(50); // 0.5%
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
 
+  const rawInputAmount = useMemo(() => {
+    return BigNumber(inputAmount)
+      .multipliedBy(10 ** (inputToken?.decimals || 0))
+      .toString();
+  }, [inputAmount, inputToken]);
+
   // Get quote when input changes
   const { data: quote, isLoading: quoteLoading } = useJupiterQuote(
     inputToken?.id || '',
     outputToken?.id || '',
-    BigNumber(inputAmount)
-      .multipliedBy(10 ** (inputToken?.decimals || 0))
-      .toString(),
+    rawInputAmount,
     slippageBps,
     user?.wallet?.address,
   );
@@ -127,7 +131,7 @@ export default function SwapInterface({
       const orderResult = await orderMutation.mutateAsync({
         inputMint: inputToken.id,
         outputMint: outputToken.id,
-        amount: inputAmount,
+        amount: rawInputAmount,
         taker: solanaAddress,
       });
 
@@ -143,23 +147,16 @@ export default function SwapInterface({
         const signedTxBase64 = Buffer.from(signature.signedTransaction).toString('base64');
 
         toast.success('Signed swap transaction created', {
-          description: signedTxBase64,
-          action: {
-            label: 'View on Solana Explorer',
-            onClick: () => {
-              window.open(`https://solscan.io/tx/${signature.signedTransaction}`, '_blank');
-            },
-          },
+          description: `Request ID: ${orderResult.requestId}`,
         });
 
         const executeSwapResult = await executeSwapMutation.mutateAsync({
-          transaction: signedTxBase64,
+          signedTransaction: signedTxBase64,
           requestId: orderResult.requestId,
         });
 
         if (executeSwapResult?.status === 'Success') {
           toast.success('Swap executed successfully', {
-            description: executeSwapResult?.signature,
             action: {
               label: 'View on Solana Explorer',
               onClick: () => {
@@ -169,7 +166,6 @@ export default function SwapInterface({
           });
         } else {
           toast.error('Swap failed', {
-            description: executeSwapResult?.signature,
             action: {
               label: 'View on Solana Explorer',
               onClick: () => {
@@ -185,7 +181,9 @@ export default function SwapInterface({
       }
     } catch (error) {
       console.error('Swap failed:', error);
-      alert('Swap failed: ' + (error as Error).message);
+      toast.error('Swap failed', {
+        description: (error as Error).message,
+      });
     } finally {
       setIsLoadingQuote(false);
     }
@@ -215,6 +213,7 @@ export default function SwapInterface({
     outputAmount &&
     parseFloat(outputAmount) > 0 &&
     !quoteLoading &&
+    !quote?.error &&
     !isLoadingQuote;
 
   const getSwapButtonText = () => {
@@ -222,6 +221,7 @@ export default function SwapInterface({
     if (!outputToken) return 'Select Output Token';
     if (!inputAmount) return 'Enter Amount';
     if (quoteLoading) return 'Getting Quote...';
+    if (quote && quote?.error) return quote?.errorMessage;
     if (isLoadingQuote) return 'Executing Swap...';
     return 'Swap';
   };
@@ -272,7 +272,7 @@ export default function SwapInterface({
         </div>
 
         {/* Swap Info */}
-        {quote && <SwapInfo quote={quote} isLoading={quoteLoading} />}
+        {quote && <SwapInfo quote={quote} isLoading={quoteLoading} outputToken={outputToken} />}
 
         {/* Slippage Settings */}
         <div className='space-y-2'>

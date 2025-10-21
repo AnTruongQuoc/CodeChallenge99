@@ -1,25 +1,32 @@
 'use client';
 
-import { Info, TrendingDown, TrendingUp } from 'lucide-react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import BigNumber from 'bignumber.js';
+import { Info, TrendingDown } from 'lucide-react';
 
-import { OrderResponse } from '@/shared/api/jupiter/types';
+import { OrderResponse, SearchItem } from '@/shared/api/jupiter/types';
+import { cn } from '@/shared/libs/utils';
 
 interface SwapInfoProps {
   quote: OrderResponse['data'] | null;
   isLoading?: boolean;
   className?: string;
+  outputToken: SearchItem | null;
 }
 
-export default function SwapInfo({ quote, isLoading = false, className = '' }: SwapInfoProps) {
+export default function SwapInfo({
+  quote,
+  isLoading = false,
+  className = '',
+  outputToken,
+}: SwapInfoProps) {
   if (!quote) {
     return null;
   }
 
-  const priceImpact = parseFloat(quote.priceImpactPct);
+  const priceImpact = Math.abs(Number(quote.priceImpact));
   const priceImpactColor =
     priceImpact > 5 ? 'text-red-400' : priceImpact > 1 ? 'text-yellow-400' : 'text-green-400';
-  const priceImpactIcon =
-    priceImpact > 1 ? <TrendingDown className='h-4 w-4' /> : <TrendingUp className='h-4 w-4' />;
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -32,7 +39,7 @@ export default function SwapInfo({ quote, isLoading = false, className = '' }: S
 
   if (isLoading) {
     return (
-      <div className={`space-y-3 ${className}`}>
+      <div className={cn('space-y-3', className)}>
         <div className='text-muted-foreground flex items-center gap-2 text-sm'>
           <Info className='h-4 w-4' />
           <span>Loading...</span>
@@ -42,10 +49,10 @@ export default function SwapInfo({ quote, isLoading = false, className = '' }: S
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      <div className='text-muted-foreground flex items-center gap-2 text-sm'>
+    <div className={cn('space-y-3', className)}>
+      <div className='flex items-center gap-2 text-sm text-indigo-400'>
         <Info className='h-4 w-4' />
-        <span>Swap Details</span>
+        <span className='font-semibold'>Swap Details</span>
       </div>
 
       <div className='space-y-2 text-sm'>
@@ -59,15 +66,18 @@ export default function SwapInfo({ quote, isLoading = false, className = '' }: S
         <div className='flex items-center justify-between'>
           <span className='text-muted-foreground'>Price Impact</span>
           <div className={`flex items-center gap-1 ${priceImpactColor}`}>
-            {priceImpactIcon}
-            <span className='font-mono'>{Math.abs(priceImpact).toFixed(2)}%</span>
+            <span className='font-mono'>{Number(priceImpact).toFixed(3)}%</span>
           </div>
         </div>
 
         <div className='flex items-center justify-between'>
           <span className='text-muted-foreground'>Minimum Received</span>
           <span className='text-foreground font-mono'>
-            {formatNumber(parseFloat(quote.otherAmountThreshold))}
+            {formatNumber(
+              BigNumber(quote.otherAmountThreshold)
+                .div(10 ** (outputToken?.decimals || 0))
+                .toNumber(),
+            )}
           </span>
         </div>
 
@@ -81,7 +91,7 @@ export default function SwapInfo({ quote, isLoading = false, className = '' }: S
         <div className='flex items-center justify-between'>
           <span className='text-muted-foreground'>Network Fee</span>
           <span className='text-foreground font-mono'>
-            ~{(quote.signatureFeeLamports / 1e9).toFixed(4)} SOL
+            ~{BigNumber(quote.signatureFeeLamports).div(LAMPORTS_PER_SOL).dp(9).toString()} SOL
           </span>
         </div>
 
@@ -95,7 +105,7 @@ export default function SwapInfo({ quote, isLoading = false, className = '' }: S
         )}
       </div>
 
-      {priceImpact > 5 && (
+      {Number(priceImpact) > 5 && (
         <div className='rounded-lg border border-red-400/20 bg-red-400/10 p-3'>
           <div className='flex items-center gap-2 text-red-400'>
             <TrendingDown className='h-4 w-4' />

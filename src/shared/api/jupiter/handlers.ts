@@ -55,9 +55,9 @@ export const getQuote = async (
  * @param requestId
  * @returns
  */
-export const executeSwap = async (transaction: string, requestId: string) => {
+export const executeSwap = async (signedTransaction: string, requestId: string) => {
   const response = await axios.post(`${JupiterEndpoints.ULTRA}/execute`, {
-    transaction,
+    signedTransaction,
     requestId,
   });
   return response.data;

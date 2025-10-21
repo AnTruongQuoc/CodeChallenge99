@@ -44,7 +44,12 @@ export const useJupiterOrder = () => {
 
 export const useJupiterExecuteSwap = () => {
   return useMutation({
-    mutationFn: ({ transaction, requestId }: { transaction: string; requestId: string }) =>
-      executeSwap(transaction, requestId),
+    mutationFn: ({
+      signedTransaction,
+      requestId,
+    }: {
+      signedTransaction: string;
+      requestId: string;
+    }) => executeSwap(signedTransaction, requestId),
   });
 };

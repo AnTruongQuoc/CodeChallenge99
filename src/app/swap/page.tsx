@@ -9,7 +9,7 @@ export default function SwapPage() {
   return (
     <div className='bg-background flex h-full w-full flex-col items-center justify-center p-4'>
       <UserHeader />
-      <div className='flex w-full flex-1 items-center justify-center'>
+      <div className='flex w-full flex-1 items-center justify-center py-4'>
         <SwapInterface
           defaultInputSearchToken={SOL_MINT_ADDRESS}
           defaultOutputSearchToken={USDC_MINT_ADDRESS}

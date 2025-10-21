@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { SearchItem } from '@/shared/api/jupiter/types';
 import { cn } from '@/shared/libs/utils';
+import { clampDecimal, formatDecimalInput } from '@/shared/utils/input';
 
 import TokenSelector from './TokenSelector';
 
@@ -46,29 +47,8 @@ export default function SwapInput({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    // Allow only numbers and decimal point
-    if (inputValue === '' || /^\d*\.?\d*$/.test(inputValue)) {
-      onChange(inputValue);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow backspace, delete, tab, escape, enter
-    if (
-      [8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-      // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-      (e.keyCode === 65 && e.ctrlKey === true) ||
-      (e.keyCode === 67 && e.ctrlKey === true) ||
-      (e.keyCode === 86 && e.ctrlKey === true) ||
-      (e.keyCode === 88 && e.ctrlKey === true)
-    ) {
-      return;
-    }
-    // Ensure that it is a number and stop the keypress
-    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
-      e.preventDefault();
-    }
+    const formatted = formatDecimalInput(e.target.value, selectedToken?.decimals || 9);
+    onChange(formatted);
   };
 
   return (
@@ -109,9 +89,14 @@ export default function SwapInput({
             type='text'
             value={value}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={() => {
+              if (value) {
+                const clamped = clampDecimal(value, 0.001, 999, selectedToken?.decimals || 9);
+                onChange(clamped);
+              }
+              setIsFocused(false);
+            }}
             placeholder={placeholder}
             disabled={disabled}
             className='text-foreground placeholder-muted-foreground flex-1 bg-transparent text-right text-lg font-medium focus:outline-none'

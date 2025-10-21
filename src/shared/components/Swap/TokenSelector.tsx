@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Check, ChevronDown, Search } from 'lucide-react';
+import { BadgeCheckIcon, Check, ChevronDown, LeafIcon, Search } from 'lucide-react';
 import Image from 'next/image';
 
 import { useJupiterSearch } from '@/shared/api/jupiter/hooks/useJupiter';
@@ -10,6 +10,7 @@ import { SearchItem } from '@/shared/api/jupiter/types';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { cn } from '@/shared/libs/utils';
+import { truncateAddress } from '@/shared/utils/string';
 
 interface TokenSelectorProps {
   selectedToken: SearchItem | null;
@@ -102,12 +103,12 @@ export default function TokenSelector({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           showCloseButton={false}
-          className='bg-card max-h-80 rounded-lg p-0 shadow-lg'
+          className='bg-card max-h-[500px] rounded-lg p-0 shadow-lg'
         >
           <DialogHeader className='sr-only'>
             <DialogTitle></DialogTitle>
           </DialogHeader>
-          <div className='max-h-80 overflow-hidden rounded-lg'>
+          <div className='max-h-[500px] overflow-hidden rounded-lg'>
             <div className='border-border border-b p-3'>
               <div className='relative'>
                 <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
@@ -123,7 +124,7 @@ export default function TokenSelector({
               </div>
             </div>
 
-            <div className='max-h-64 overflow-y-auto'>
+            <div className='max-h-96 overflow-y-auto'>
               {isLoading ? (
                 <div className='text-muted-foreground p-4 text-center'>
                   <div className='mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent'></div>
@@ -134,11 +135,11 @@ export default function TokenSelector({
                   <button
                     key={token.id}
                     onClick={() => handleTokenSelect(token)}
-                    className='hover:bg-accent border-border flex w-full items-center gap-3 border-b p-3 transition-colors last:border-b-0'
+                    className='hover:bg-accent border-border flex w-full cursor-pointer items-center gap-3 border-b p-3 transition-colors last:border-b-0'
                   >
                     <Image
-                      width={24}
-                      height={24}
+                      width={32}
+                      height={32}
                       src={token.icon}
                       alt={token.symbol}
                       className='rounded-full object-cover'
@@ -147,25 +148,46 @@ export default function TokenSelector({
                       }}
                       unoptimized
                     />
-                    <div className='flex-1 text-left'>
+                    <div className='flex flex-1 flex-col gap-1 text-left'>
                       <div className='flex items-center gap-2'>
-                        <span className='text-foreground font-medium'>{token.symbol}</span>
-                        {token.isVerified && (
-                          <span className='rounded bg-green-400/20 px-2 py-0.5 text-xs text-green-400'>
-                            Verified
-                          </span>
+                        <span className='text-foreground font-semibold'>{token.symbol}</span>
+                        {token.isVerified && <BadgeCheckIcon className='h-4 w-4 text-green-400' />}
+                        {token.organicScore > 0 && (
+                          <div className='flex items-center gap-0.5'>
+                            <LeafIcon
+                              className={cn(
+                                'size-3.5',
+                                token.organicScore > 50 ? 'text-green-300' : 'text-gray-400',
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                'rounded text-xs',
+                                token.organicScore > 50 ? 'text-green-300' : 'text-gray-400',
+                              )}
+                            >
+                              {Math.round(token.organicScore)}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <div className='text-muted-foreground text-sm'>{token.name}</div>
-                      {token.usdPrice && (
-                        <div className='text-muted-foreground text-xs'>
-                          ${token.usdPrice.toLocaleString()}
+                      <div className='text-muted-foreground text-xs'>{token.name}</div>
+                      {token.id && (
+                        <div className='text-muted-foreground text-xs font-semibold'>
+                          {truncateAddress(token.id)}
                         </div>
                       )}
                     </div>
-                    {selectedToken?.id === token.id && (
-                      <Check className='h-4 w-4 text-indigo-400' />
-                    )}
+                    <div className='flex h-full items-center justify-center gap-2'>
+                      {token.usdPrice && (
+                        <div className='text-foreground text-sm font-semibold'>
+                          ${token.usdPrice.toLocaleString()}
+                        </div>
+                      )}
+                      {selectedToken?.id === token.id && (
+                        <Check className='h-4 w-4 text-indigo-400' />
+                      )}
+                    </div>
                   </button>
                 ))
               ) : debouncedQuery ? (

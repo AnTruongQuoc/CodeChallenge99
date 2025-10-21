@@ -14,11 +14,13 @@ const envSchema = createEnv({
     NEXT_PUBLIC_JUPITER_URL: z.url().default('https://api-lite.jup.ag'),
     NEXT_PUBLIC_SOLANA_RPC_URL: z.url().default('https://api.mainnet-beta.solana.com'),
     NEXT_PUBLIC_PRIVY_APP_ID: z.string().default(''),
+    NEXT_PUBLIC_CSP_ALLOWED_APP_DOMAINS: z.string().default(''),
   },
   runtimeEnv: {
     NEXT_PUBLIC_JUPITER_URL: process.env.NEXT_PUBLIC_JUPITER_URL,
     NEXT_PUBLIC_SOLANA_RPC_URL: process.env.NEXT_PUBLIC_SOLANA_RPC_URL,
     NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+    NEXT_PUBLIC_CSP_ALLOWED_APP_DOMAINS: process.env.NEXT_PUBLIC_CSP_ALLOWED_APP_DOMAINS,
     NODE_ENV: process.env.NODE_ENV,
   },
 });
