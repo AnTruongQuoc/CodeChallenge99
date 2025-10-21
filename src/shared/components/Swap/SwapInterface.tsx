@@ -92,6 +92,30 @@ export default function SwapInterface({
     }
   };
 
+  const handleSelectInputToken = (token: SearchItem | null) => {
+    if (token?.id === outputToken?.id) {
+      if (inputToken) {
+        swapTokens();
+      } else {
+        toast.error('Input and output tokens cannot be the same');
+      }
+      return;
+    }
+    setInputToken(token);
+  };
+
+  const handleSelectOutputToken = (token: SearchItem | null) => {
+    if (token?.id === inputToken?.id) {
+      if (outputToken) {
+        swapTokens();
+      } else {
+        toast.error('Input and output tokens cannot be the same');
+      }
+      return;
+    }
+    setOutputToken(token);
+  };
+
   // Swap tokens
   const swapTokens = () => {
     const tempToken = inputToken;
@@ -245,7 +269,7 @@ export default function SwapInterface({
               value={inputAmount}
               onChange={handleInputAmountChange}
               selectedToken={inputToken}
-              onTokenSelect={setInputToken}
+              onTokenSelect={handleSelectInputToken}
               onMaxClick={handleMaxClick}
               placeholder='0.0'
               disabled={!inputToken}
@@ -263,7 +287,7 @@ export default function SwapInterface({
               value={outputAmount}
               onChange={handleOutputAmountChange}
               selectedToken={outputToken}
-              onTokenSelect={setOutputToken}
+              onTokenSelect={handleSelectOutputToken}
               placeholder='0.0'
               disabled={!outputToken}
               defaultSearchToken={defaultOutputSearchToken}
