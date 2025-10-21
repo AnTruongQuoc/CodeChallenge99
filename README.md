@@ -43,17 +43,21 @@ A Next.js application showcasing three coding challenges: algorithmic problem so
 ```
 src/
 ├── app/                          # Next.js App Router pages
-│   ├── (home)/                   # Home page group
+│   ├── (home)/                   # Problem 1 Page
 │   │   ├── components/           # Home-specific components
 │   │   │   └── ThreeWaysToSumDemo.tsx
 │   │   ├── error.tsx            # Error boundary
 │   │   └── page.tsx             # Home page
-│   ├── swap/                     # Swap functionality
+│   ├── swap/                    # Problem 2 Page
 │   │   ├── components/          # Swap-specific components
 │   │   │   ├── Ping/            # Ping functionality
 │   │   │   └── User/            # User-related components
 │   │   ├── layout.tsx           # Swap layout
 │   │   └── page.tsx             # Swap page
+│   ├── messy-review/            # Problem 3 Page
+│   │   ├── components/          # Components
+│   │   │   └── CodeReviewDemo/  # Code review demo components
+│   │   └── page.tsx             # Code Review page
 │   ├── layout.tsx               # Root layout
 │   └── favicon.ico
 ├── shared/                       # Shared application code
